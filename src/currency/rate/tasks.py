@@ -75,23 +75,16 @@ def parse_minora():
     response.raise_for_status()
     data = response.json()
     source = 3
+    currency_map = {
+        'Dollar': 1,
+        'Euro': 2,
+    }
     TWOPLACES = Decimal(10) ** -2
     for key in data:
-        if key == 'Dollar':
-            currency = 1
-            buy = Decimal(data['Dollar']['buy']).quantize(TWOPLACES)
-            sale = Decimal(data['Dollar']['sale']).quantize(TWOPLACES)
-            last_rate = Rate.objects.filter(source=source, currency=currency).last()
-            if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
-                Rate.objects.create(
-                    currency=currency,
-                    source=source,
-                    buy=buy,
-                    sale=sale)
-        if key == 'Euro':
-            currency = 2
-            buy = Decimal(data['Euro']['buy']).quantize(TWOPLACES)
-            sale = Decimal(data['Euro']['sale']).quantize(TWOPLACES)
+        if key in currency_map:
+            currency = currency_map[key]
+            buy = Decimal(data[key]['buy']).quantize(TWOPLACES)
+            sale = Decimal(data[key]['sale']).quantize(TWOPLACES)
             last_rate = Rate.objects.filter(source=source, currency=currency).last()
             if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
                 Rate.objects.create(
