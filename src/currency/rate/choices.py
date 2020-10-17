@@ -4,10 +4,18 @@ CURRENCY_CHOICES = (
     (CURRENCY_USD, 'USD'),
     (CURRENCY_EUR, 'EUR')
 )
+
+SOURCE_PRIVATBANK = 1
+SOURCE_MONOBANK = 2
+SOURCE_MINORA = 3
+SOURCE_PUMB = 4
+SOURCE_KREDOBANK = 5
+
+
 SOURCE_CHOICES = (
-    (1, 'PrivatBank'),
-    (2, 'Monobank'),
-    (3, 'Minora'),
-    (4, 'PUMB'),
-    (5, 'KredoBank'),
+    (SOURCE_PRIVATBANK, 'PrivatBank'),
+    (SOURCE_MONOBANK, 'Monobank'),
+    (SOURCE_MINORA, 'Minora'),
+    (SOURCE_PUMB, 'PUMB'),
+    (SOURCE_KREDOBANK, 'KredoBank'),
 )

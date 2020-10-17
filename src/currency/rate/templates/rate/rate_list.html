@@ -2,8 +2,14 @@
 {% block content %}
   <div class="row">
     <div class="col">
+      <div>{{object_count}}</div>
+      <div>
+        <a href = "{% url 'rate:list-csv' %}">DOWNLOAD CSV</a>
+      </div>
+      <div>
+        <a href = "{% url 'rate:list-xlsx' %}">DOWNLOAD XLSX</a>
+      </div>
       {% for rate in rate_list %}
-
         <p>
           COUNTER:{{ forloop.counter }}
           ID: {{ rate.id }}
@@ -11,7 +17,6 @@
           CURRENCY: {{ rate.get_currency_display }}
 
         </p>
-
       {% endfor %}
     </div>
   </div>
