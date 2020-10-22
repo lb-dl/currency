@@ -14,9 +14,15 @@
           COUNTER:{{ forloop.counter }}
           ID: {{ rate.id }}
           BUY: {{ rate.buy }}
+          SALE: {{ rate.sale }}
           CURRENCY: {{ rate.get_currency_display }}
-
+          SOURCE: {{ rate.get_source_display }}
+          {% if request.user.is_superuser %}
+          <a href = "{% url 'rate:update-rate' rate.id %}">Update</a>
+          <a href = "{% url 'rate:delete-rate' rate.id %}">Delete</a>
+          {% endif %}
         </p>
+
       {% endfor %}
     </div>
   </div>

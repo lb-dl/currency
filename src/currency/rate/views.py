@@ -3,10 +3,12 @@ from io import BytesIO
 
 from django.core.mail import send_mail
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, View
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView, View
 
 from rate.models import ContactUs, Feedback, Rate
+from rate.selectors import get_latest_rates
 from rate.utils import display
 
 import xlsxwriter
@@ -89,3 +91,37 @@ class XLSXView(View):
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         return response
+
+
+class LatestRates(View):
+
+    def get(self, request):
+        context = {'rate_latest': get_latest_rates()}
+        return render(request, 'rate/latest_rates.html', context=context)
+
+
+def handler404(request, exception):
+    context = {}
+    response = render(request, "404.html", context=context)
+    response.status_code = 404
+    return response
+
+
+def handler500(request):
+    context = {}
+    response = render(request, "500.html", context=context)
+    response.status_code = 500
+    return response
+
+
+class UpdateRate(UpdateView):
+    queryset = Rate.objects.all()
+    fields = ('source', 'currency', 'buy', 'sale')
+    success_url = reverse_lazy('index')
+
+
+class DeleteRate(DeleteView):
+    model = Rate
+    template_name = 'rate/delete_rate.html'
+    context_object_name = 'rate'
+    success_url = reverse_lazy('index')

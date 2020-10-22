@@ -6,9 +6,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = '04$cymb0@u215fzk+v@kbxl_m-z0g0$mc#b%^(kiuw51enu3#h'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1']
+if DEBUG is False:
+    ALLOWED_HOSTS = [
+        '127.0.0.1:8000',
+        '*',
+    ]
+
+if DEBUG is True:
+    ALLOWED_HOSTS = ['127.0.0.1']
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -20,6 +28,7 @@ INSTALLED_APPS = [
     'rate',
     'django_extensions',
     'debug_toolbar',
+    'account'
     ]
 
 MIDDLEWARE = [
@@ -61,6 +70,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -87,6 +103,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+AUTH_USER_MODEL = 'account.User'
 
 
 # Static files (CSS, JavaScript, Images)

@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         date_format = '%d.%m.%Y'
-        created = datetime(2014, 12, 1)
+        created = datetime(2018, 1, 1)
         end = datetime.now()
         date_generated = [
             created + timedelta(days=x)

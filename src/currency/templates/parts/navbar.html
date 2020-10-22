@@ -12,11 +12,22 @@
                     <a class="nav-link" href="{% url 'rate:list' %}">Rate List</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'rate:list-latest' %}">Latest Rate</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'rate:contact-us-create' %}">Contact Us</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'rate:feedback-create' %}">Feedback</a>
                 </li>
+                {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="{% url 'account:my_profile' %}">
+                        My Profile
+                    </a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
