@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row">
+    <div class="col">
+      <div>{{object_count}}</div>
+      <div>
+        <a href = "{% url 'rate:list-csv' %}">DOWNLOAD CSV</a>
+      </div>
+      <div>
+        <a href = "{% url 'rate:list-xlsx' %}">DOWNLOAD XLSX</a>
+      </div>
+      {% for rate in rate_list %}
+        <p>
+          COUNTER:{{ forloop.counter }}
+          ID: {{ rate.id }}
+          BUY: {{ rate.buy }}
+          SALE: {{ rate.sale }}
+          CURRENCY: {{ rate.get_currency_display }}
+          SOURCE: {{ rate.get_source_display }}
+          {% if request.user.is_superuser %}
+          <a href = "{% url 'rate:update-rate' rate.id %}">Update</a>
+          <a href = "{% url 'rate:delete-rate' rate.id %}">Delete</a>
+          {% endif %}
+        </p>
+
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

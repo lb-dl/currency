@@ -1,13 +1,11 @@
-from decimal import Decimal
-
 from bs4 import BeautifulSoup
 
 from celery import shared_task
 
-import requests
+from rate import choices
+from rate.utils import to_decimal
 
-# from django.contrib.auth.models import User
-# from django.utils.crypto import get_random_string
+import requests
 
 
 @shared_task
@@ -18,16 +16,15 @@ def parse_privatbank():
     # rase an error if status is not 200
     response.raise_for_status()
     data = response.json()
-    source = 1
+    source = choices.SOURCE_PRIVATBANK
     currency_map = {
-        'USD': 1,
-        'EUR': 2,
+        'USD': choices.CURRENCY_USD,
+        'EUR': choices.CURRENCY_EUR,
     }
-    TWOPLACES = Decimal(10) ** -2
     for row in data:
         if row['ccy'] in currency_map:
-            buy = Decimal(row['buy']).quantize(TWOPLACES)
-            sale = Decimal(row['sale']).quantize(TWOPLACES)
+            buy = to_decimal(row['buy'])
+            sale = to_decimal(row['sale'])
             currency = currency_map[row['ccy']]
             last_rate = Rate.objects.filter(source=source, currency=currency).last()
             if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
@@ -46,16 +43,15 @@ def parse_monobank():
     response = requests.get(url)
     response.raise_for_status()
     data = response.json()[0:2]
-    source = 2
+    source = choices.SOURCE_MONOBANK
     currency_map = {
-        840: 1,
-        978: 2,
+        840: choices.CURRENCY_USD,
+        978: choices.CURRENCY_EUR,
     }
-    TWOPLACES = Decimal(10) ** -2
     for row in data:
         if row['currencyCodeA'] in currency_map:
-            buy = Decimal(row['rateBuy']).quantize(TWOPLACES)
-            sale = Decimal(row['rateSell']).quantize(TWOPLACES)
+            buy = to_decimal(row['rateBuy'])
+            sale = to_decimal(row['rateSell'])
             currency = currency_map[row['currencyCodeA']]
             last_rate = Rate.objects.filter(source=source, currency=currency).last()
             if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
@@ -74,24 +70,16 @@ def parse_minora():
     response = requests.get(url)
     response.raise_for_status()
     data = response.json()
-    source = 3
-    TWOPLACES = Decimal(10) ** -2
+    source = choices.SOURCE_MINORA
+    currency_map = {
+        'Dollar': choices.CURRENCY_USD,
+        'Euro': choices.CURRENCY_EUR,
+    }
     for key in data:
-        if key == 'Dollar':
-            currency = 1
-            buy = Decimal(data['Dollar']['buy']).quantize(TWOPLACES)
-            sale = Decimal(data['Dollar']['sale']).quantize(TWOPLACES)
-            last_rate = Rate.objects.filter(source=source, currency=currency).last()
-            if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
-                Rate.objects.create(
-                    currency=currency,
-                    source=source,
-                    buy=buy,
-                    sale=sale)
-        if key == 'Euro':
-            currency = 2
-            buy = Decimal(data['Euro']['buy']).quantize(TWOPLACES)
-            sale = Decimal(data['Euro']['sale']).quantize(TWOPLACES)
+        if key in currency_map:
+            currency = currency_map[key]
+            buy = to_decimal(data[key]['buy'])
+            sale = to_decimal(data[key]['sale'])
             last_rate = Rate.objects.filter(source=source, currency=currency).last()
             if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
                 Rate.objects.create(
@@ -107,7 +95,7 @@ def parse_pumb():
     url = 'https://retail.pumb.ua/'
     response = requests.get(url)
     response.raise_for_status()
-    source = 4
+    source = choices.SOURCE_PUMB
     soup = BeautifulSoup(response.content, 'lxml')
     table = soup.find('table')
     buy_usd = table.find_all('tr')[1].find_all('td')[1].text
@@ -118,14 +106,13 @@ def parse_pumb():
     euro = dict(ccy='EUR', buy=buy_euro, sale=sale_euro)
     data = [usd, euro]
     currency_map = {
-        'USD': 1,
-        'EUR': 2,
+        'USD': choices.CURRENCY_USD,
+        'EUR': choices.CURRENCY_EUR,
     }
-    TWOPLACES = Decimal(10) ** -2
     for row in data:
         if row['ccy'] in currency_map:
-            buy = Decimal(row['buy']).quantize(TWOPLACES)
-            sale = Decimal(row['sale']).quantize(TWOPLACES)
+            buy = to_decimal(row['buy'])
+            sale = to_decimal(row['sale'])
             currency = currency_map[row['ccy']]
             last_rate = Rate.objects.filter(source=source, currency=currency).last()
             if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:
@@ -143,7 +130,7 @@ def parse_kredobank():
     url = 'https://kredobank.com.ua/info/kursy-valyut/commercial'
     response = requests.get(url)
     response.raise_for_status()
-    source = 5
+    source = choices.SOURCE_KREDOBANK
     soup = BeautifulSoup(response.content, 'lxml')
     table = soup.find('table')
     buy_usd = int(table.find_all('tr')[1].find_all('td')[3].text)/100
@@ -154,14 +141,13 @@ def parse_kredobank():
     euro = dict(ccy='EUR', buy=buy_euro, sale=sale_euro)
     data = [usd, euro]
     currency_map = {
-        'USD': 1,
-        'EUR': 2,
+        'USD': choices.CURRENCY_USD,
+        'EUR': choices.CURRENCY_EUR,
     }
-    TWOPLACES = Decimal(10) ** -2
     for row in data:
         if row['ccy'] in currency_map:
-            buy = Decimal(row['buy']).quantize(TWOPLACES)
-            sale = Decimal(row['sale']).quantize(TWOPLACES)
+            buy = to_decimal(row['buy'])
+            sale = to_decimal(row['sale'])
             currency = currency_map[row['ccy']]
             last_rate = Rate.objects.filter(source=source, currency=currency).last()
             if last_rate is None or buy != last_rate.buy or sale != last_rate.sale:

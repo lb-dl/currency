@@ -1,21 +1,37 @@
+from django.core.cache import cache
 from django.db import models
+
+from rate import choices
 
 
 # Create a model Rate here
 class Rate(models.Model):
-    CURRENCY_CHOICES = (
-        (1, 'USD'),
-        (2, 'EUR')
-    )
-    SOURCE_CHOICES = (
-        (1, 'PrivatBank'),
-        (2, 'Monobank'),
-        (3, 'Minora'),
-        (4, 'PUMB'),
-        (5, 'KredoBank'),
-    )
-    source = models.PositiveSmallIntegerField(choices=SOURCE_CHOICES)
-    currency = models.PositiveSmallIntegerField(choices=CURRENCY_CHOICES)
+
+    source = models.PositiveSmallIntegerField(choices=choices.SOURCE_CHOICES)
+    currency = models.PositiveSmallIntegerField(choices=choices.CURRENCY_CHOICES)
     buy = models.DecimalField(max_digits=6, decimal_places=2)
     sale = models.DecimalField(max_digits=6, decimal_places=2)
     created = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        key = self.__class__.cache_key(self.currency, self.source)
+        cache.delete(key)
+
+    @classmethod
+    def cache_key(cls, currency, source):
+        import hashlib
+        return hashlib.md5(
+          f"RateLatest:{currency}_{source}".encode())\
+            .hexdigest()
+
+
+class ContactUs(models.Model):
+    email = models.EmailField()
+    subject = models.CharField(max_length=128)
+    text = models.TextField()
+
+
+class Feedback(models.Model):
+    raiting = models.CharField(max_length=2)
+    text = models.TextField()

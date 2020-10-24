@@ -5,5 +5,5 @@ install:
   - pip install -r requirements.txt
 script:
   - flake8 ./src
-  - python3 manage.py check
-  - python3 manage.py makemigrations --check --dry-run
+  - python3 ./src/currency/manage.py check
+  - python3 ./src/currency/manage.py makemigrations --check --dry-run
