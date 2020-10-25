@@ -15,15 +15,12 @@ class Rate(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        key = self.__class__.cache_key(self.currency, self.source)
+        key = self.__class__.cache_key()
         cache.delete(key)
 
     @classmethod
-    def cache_key(cls, currency, source):
-        import hashlib
-        return hashlib.md5(
-          f"RateLatest:{currency}_{source}".encode())\
-            .hexdigest()
+    def cache_key(cls):
+        return 'key'
 
 
 class ContactUs(models.Model):
